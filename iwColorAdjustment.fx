@@ -1,42 +1,59 @@
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-// èƒŒæ™¯ã®ã‚¯ãƒªã‚¢å€¤
-float4 ClearColor = {1,1,1,0};
-float ClearDepth  = 1.0;
+#include "Adjustments\ColorConverter.fxsub"
+#include "Adjustments\hsv.fxsub"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+// ƒRƒ“ƒgƒ[ƒ‰
+#define CONTROLLER_NAME "iwColorAdjustmentController.pmx"
 
-// ãƒã‚¹ãƒˆã‚¨ãƒ•ã‚§ã‚¯ãƒˆã§ã¯å¿…ãšä»¥ä¸‹ã®è¨­å®šã‚’ã™ã‚‹ã€‚
+float mHuePlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "F‘Š+"; >;
+float mHueMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "F‘Š-"; >;
+float mSatPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "Ê“x+"; >;
+float mSatMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "Ê“x-"; >;
+float mValPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "–¾“x+"; >;
+float mValMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "–¾“x-"; >;
+float mContrast : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "ƒRƒ“ƒgƒ‰ƒXƒg"; >;
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ƒ|ƒXƒgƒGƒtƒFƒNƒg‚Å‚Í•K‚¸ˆÈ‰º‚Ìİ’è‚ğ‚·‚éB
 float Script : STANDARDSGLOBAL <
     string ScriptOutput = "color";
     string ScriptClass = "scene";
     string ScriptOrder = "postprocess";
 > = 0.8;
 
+// ƒXƒNƒŠ[ƒ“ƒTƒCƒY
+float2 ViewportSize : VIEWPORTPIXELSIZE;
 
-// ã‚ªãƒªã‚¸ãƒŠãƒ«ã®æç”»çµæœã‚’è¨˜éŒ²ã™ã‚‹ãŸã‚ã®ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆ
-texture ScnMap : RENDERCOLORTARGET <
+// ”¼ƒsƒNƒZƒ‹
+static float2 ViewportOffset = (float2(0.5,0.5)/ViewportSize);
+
+// ”wŒi‚ÌƒNƒŠƒA’l
+float4 ClearColor = {1,1,1,0};
+float ClearDepth  = 1.0;
+
+// ƒIƒŠƒWƒiƒ‹‚Ì•`‰æŒ‹‰Ê‚ğ‹L˜^‚·‚é‚½‚ß‚ÌƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg
+texture2D ScnMap : RENDERCOLORTARGET <
     float2 ViewPortRatio = {1.0,1.0};
+    int MipLevels = 1;
+    string Format = "A8R8G8B8" ;
 >;
-sampler ScnSamp = sampler_state {
+sampler2D ScnSamp = sampler_state {
     texture = <ScnMap>;
     MinFilter = LINEAR;
     MagFilter = LINEAR;
     MipFilter = NONE;
+    AddressU  = CLAMP;
+    AddressV = CLAMP;
 };
 
-// æ·±åº¦ãƒãƒƒãƒ•ã‚¡
-texture DepthBuffer : RENDERDEPTHSTENCILTARGET <
+// [“xƒoƒbƒtƒ@
+texture2D DepthBuffer : RENDERDEPTHSTENCILTARGET <
     float2 ViewPortRatio = {1.0,1.0};
+    string Format = "D24S8";
 >;
-
-
-// ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ã‚µã‚¤ã‚º
-float2 ViewportSize : VIEWPORTPIXELSIZE;
-
-// åŠãƒ”ã‚¯ã‚»ãƒ«
-static float2 ViewportOffset = (float2(0.5,0.5)/ViewportSize);
-
 
 struct VS_OUTPUT {
     float4 Pos			: POSITION;
@@ -44,10 +61,10 @@ struct VS_OUTPUT {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// ã‚·ã‚§ãƒ¼ãƒ€
+// ƒVƒF[ƒ_
 
 VS_OUTPUT VS_DrawBuffer( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
-    VS_OUTPUT Out; 
+    VS_OUTPUT Out = (VS_OUTPUT)0; 
     
     Out.Pos = Pos;
     Out.Tex = Tex + ViewportOffset;
@@ -59,8 +76,10 @@ float4 PS_DrawBuffer(float2 Tex: TEXCOORD0) : COLOR
 {   
     float4 Color = tex2D( ScnSamp, Tex );
     
-    // ä½•ã‹å‡¦ç†
-    
+    Color = HSVFrom(Color);
+    Color = hsvAdjustment(Color, mHuePlus - mHueMinus, 1.0 + (mSatPlus * 2 - mSatMinus), 1.0 + (mValPlus * 2 - mValMinus));
+    Color = RGBFrom(Color);
+
     return Color;
 }
 

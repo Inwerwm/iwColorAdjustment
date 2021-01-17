@@ -1,0 +1,4 @@
+float4 hsvAdjustment(float4 hsvColor, float huePhase, float satScale, float valScale){
+    huePhase = huePhase < 0 ? 1 + huePhase : huePhase;
+    return float4((hsvColor.x + huePhase) % 1, clamp(hsvColor.y * satScale,0,1), hsvColor.z * valScale, hsvColor.w);
+}

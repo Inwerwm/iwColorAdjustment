@@ -1,0 +1,37 @@
+float4 GrayscaleFrom(float4 Color){
+    float gray = 0.299 * Color.r + 0.587 * Color.g + 0.114 * Color.b;
+    return float4(gray, gray, gray, 1.0);
+}
+
+float4 HSVFrom(float4 RGB){
+    float maxValue = max(max(RGB.r, RGB.g), RGB.b);
+    float minValue = min(min(RGB.r, RGB.g), RGB.b);
+
+    bool hueIsNega = RGB.g - RGB.b < 0;
+
+    float h;
+    h = maxValue == minValue ? 0.0f
+      : maxValue == RGB.r ? (hueIsNega ? 6.0 : 0.0f) + ((RGB.g - RGB.b) / (maxValue - minValue))
+      : maxValue == RGB.g ? 2.0f + ((RGB.b - RGB.r) / (maxValue - minValue))
+      :                     4.0f + ((RGB.r - RGB.g) / (maxValue - minValue))
+      ;
+
+    return float4(h / 6.0f, maxValue - minValue, maxValue, RGB.a);
+}
+
+float4 RGBFrom(float4 HSV){
+    float h = HSV.r;
+    float s = HSV.g;
+    float v = HSV.b;
+    float a = HSV.a;
+
+    int selector = h * 6;
+    float remainder = h * 6.0 - (float)selector;
+
+    return selector == 1 ? float4( v * 1 - s * remainder       , v                           , v * 1 - s                   , a)
+         : selector == 2 ? float4( v * 1 - s                   , v                           , v * 1 - s * (1 - remainder) , a)
+         : selector == 3 ? float4( v * 1 - s                   , v * 1 - s * remainder       , v                           , a)
+         : selector == 4 ? float4( v * 1 - s * (1 - remainder) , v * 1 - s                   , v                           , a)
+         : selector == 5 ? float4( v                           , v * 1 - s                   , v * 1 - s * remainder       , a)
+         :                 float4( v                           , v * 1 - s * (1 - remainder) , v * 1 - s                   , a);
+}
