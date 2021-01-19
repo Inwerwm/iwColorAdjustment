@@ -2,7 +2,6 @@
 #include "Adjustments\hsv.fxsub"
 #include "Adjustments\BrightnessContrast.fxsub"
 
-////////////////////////////////////////////////////////////////////////////////////////////////
 // コントローラ
 #define CONTROLLER_NAME "iwColorAdjustmentController.pmx"
 
@@ -15,11 +14,7 @@ float mValMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "
 float mCntPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "コントラスト+"; >;
 float mCntMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "コントラスト-"; >;
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-// ポストエフェクトでは必ず以下の設定をする。
+// ポストエフェクト設定
 float Script : STANDARDSGLOBAL <
     string ScriptOutput = "color";
     string ScriptClass = "scene";
@@ -72,9 +67,7 @@ struct VS_OUTPUT {
     float2 Tex			: TEXCOORD0;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////
 // シェーダ
-
 VS_OUTPUT VS( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
     VS_OUTPUT Out = (VS_OUTPUT)0; 
     
@@ -104,7 +97,6 @@ float4 PS_BrightnessContrast(float2 Tex: TEXCOORD0) : COLOR{
 
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////
 
 technique PostEffect <
     string Script = 
@@ -140,4 +132,3 @@ technique PostEffect <
         PixelShader  = compile ps_2_0 PS_BrightnessContrast();
     }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////
