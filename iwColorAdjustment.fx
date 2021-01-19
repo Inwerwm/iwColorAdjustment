@@ -1,5 +1,6 @@
 #include "Adjustments\ColorConverter.fxsub"
 #include "Adjustments\hsv.fxsub"
+#include "Adjustments\BrightnessContrast.fxsub"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // コントローラ
@@ -11,7 +12,8 @@ float mSatPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "
 float mSatMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "彩度-"; >;
 float mValPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "明度+"; >;
 float mValMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "明度-"; >;
-float mContrast : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "コントラスト"; >;
+float mCntPlus  : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "コントラスト+"; >;
+float mCntMinus : CONTROLOBJECT < string name = CONTROLLER_NAME; string item = "コントラスト-"; >;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -79,6 +81,7 @@ float4 PS_DrawBuffer(float2 Tex: TEXCOORD0) : COLOR
     Color = HSVFrom(Color);
     Color = hsvAdjustment(Color, mHuePlus - mHueMinus, 1.0 + (mSatPlus * 2 - mSatMinus), 1.0 + (mValPlus * 2 - mValMinus));
     Color = RGBFrom(Color);
+    // Color = Contrast(Color, mCntPlus/2 - mCntMinus/2);
 
     return Color;
 }
