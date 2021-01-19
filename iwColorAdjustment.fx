@@ -91,7 +91,7 @@ float4 PS_HSVScaling(float2 Tex: TEXCOORD0) : COLOR
 float4 PS_BrightnessContrast(float2 Tex: TEXCOORD0) : COLOR{
     float4 Color = tex2D( ScnSamp2, Tex );
     
-    Color = ScaleBrightnessContrast(Color, mValPlus - mValMinus, (1 + mCntPlus - mCntMinus) / 4);
+    Color = ScaleBrightnessContrast(Color, mValPlus - mValMinus, mCntPlus - mCntMinus);
 
     return Color;
 
