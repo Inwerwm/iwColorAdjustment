@@ -1,0 +1,14 @@
+float ScaleBrightnessContrast(float color, float brightness, float contrast){
+    float slant = tan((contrast + 1.0) * 3.1415926535);
+    float bright = brightness < 0.0 ? color * (1 + brightness) : color + ((1.0 - color) * brightness);
+    return (bright - 0.5) * slant + 0.5;
+}
+
+float4 ScaleBrightnessContrast(float4 color, float brightness, float contrast){
+    return float4(
+        ScaleBrightnessContrast(color.r, brightness, contrast),
+        ScaleBrightnessContrast(color.g, brightness, contrast),
+        ScaleBrightnessContrast(color.b, brightness, contrast),
+        color.a
+    );
+}

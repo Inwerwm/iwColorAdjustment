@@ -51,6 +51,16 @@ sampler2D ScnSamp = sampler_state {
     AddressV = CLAMP;
 };
 
+texture2D ScnMap2 : RENDERCOLORTARGET <
+    float2 ViewPortRatio = {1.0,1.0};
+>;
+sampler2D ScnSamp2 = sampler_state {
+    texture = <ScnMap2>;
+    MinFilter = LINEAR;
+    MagFilter = LINEAR;
+    MipFilter = NONE;
+};
+
 // 深度バッファ
 texture2D DepthBuffer : RENDERDEPTHSTENCILTARGET <
     float2 ViewPortRatio = {1.0,1.0};
@@ -65,7 +75,7 @@ struct VS_OUTPUT {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // シェーダ
 
-VS_OUTPUT VS_DrawBuffer( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
+VS_OUTPUT VS( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
     VS_OUTPUT Out = (VS_OUTPUT)0; 
     
     Out.Pos = Pos;
@@ -74,16 +84,24 @@ VS_OUTPUT VS_DrawBuffer( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
     return Out;
 }
 
-float4 PS_DrawBuffer(float2 Tex: TEXCOORD0) : COLOR
+float4 PS_HSVScaling(float2 Tex: TEXCOORD0) : COLOR
 {   
     float4 Color = tex2D( ScnSamp, Tex );
     
     Color = HSVFrom(Color);
-    Color = hsvAdjustment(Color, mHuePlus - mHueMinus, 1.0 + (mSatPlus * 2 - mSatMinus), 1.0 + (mValPlus * 2 - mValMinus));
+    Color = hsvAdjustment(Color, mHuePlus - mHueMinus, 1.0 + (mSatPlus * 2 - mSatMinus), 1.0);
     Color = RGBFrom(Color);
-    // Color = Contrast(Color, mCntPlus/2 - mCntMinus/2);
 
     return Color;
+}
+
+float4 PS_BrightnessContrast(float2 Tex: TEXCOORD0) : COLOR{
+    float4 Color = tex2D( ScnSamp2, Tex );
+    
+    Color = ScaleBrightnessContrast(Color, mValPlus - mValMinus, (1 + mCntPlus - mCntMinus) / 4);
+
+    return Color;
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,15 +115,29 @@ technique PostEffect <
         "Clear=Color;"
         "Clear=Depth;"
         "ScriptExternal=Color;"
+
+        "RenderColorTarget0=ScnMap2;"
+        "RenderDepthStencilTarget=DepthBuffer;"
+        "ClearSetColor=ClearColor;"
+        "ClearSetDepth=ClearDepth;"
+        "Clear=Color;"
+        "Clear=Depth;"
+        "Pass=HSVScaling;"
+
         "RenderColorTarget0=;"
         "RenderDepthStencilTarget=;"
-        "Pass=DrawBuffer;"
+        "Pass=BrightnessContrast;"
     ;
 > {
-    pass DrawBuffer < string Script= "Draw=Buffer;"; > {
+    pass HSVScaling < string Script= "Draw=Buffer;"; > {
         AlphaBlendEnable = FALSE;
-        VertexShader = compile vs_2_0 VS_DrawBuffer();
-        PixelShader  = compile ps_2_0 PS_DrawBuffer();
+        VertexShader = compile vs_2_0 VS();
+        PixelShader  = compile ps_2_0 PS_HSVScaling();
+    }
+    pass BrightnessContrast < string Script= "Draw=Buffer;"; > {
+        AlphaBlendEnable = FALSE;
+        VertexShader = compile vs_2_0 VS();
+        PixelShader  = compile ps_2_0 PS_BrightnessContrast();
     }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
