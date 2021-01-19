@@ -79,7 +79,7 @@ VS_OUTPUT VS( float4 Pos : POSITION, float4 Tex : TEXCOORD0 ){
     return Out;
 }
 
-float4 PS_HSVScaling(float2 Tex: TEXCOORD0) : COLOR
+float4 PS_HueSaturation(float2 Tex: TEXCOORD0) : COLOR
 {   
     float4 Color = tex2D( ScnSamp, Tex );
     
@@ -91,7 +91,7 @@ float4 PS_HSVScaling(float2 Tex: TEXCOORD0) : COLOR
 float4 PS_BrightnessContrast(float2 Tex: TEXCOORD0) : COLOR{
     float4 Color = tex2D( ScnSamp2, Tex );
     
-    Color = ScaleBrightnessContrast(Color, mValPlus - mValMinus, mCntPlus - mCntMinus);
+    Color = AdjustBrightnessContrast(Color, mValPlus - mValMinus, mCntPlus - mCntMinus);
 
     return Color;
 
@@ -124,7 +124,7 @@ technique PostEffect <
     pass HSVScaling < string Script= "Draw=Buffer;"; > {
         AlphaBlendEnable = FALSE;
         VertexShader = compile vs_2_0 VS();
-        PixelShader  = compile ps_2_0 PS_HSVScaling();
+        PixelShader  = compile ps_2_0 PS_HueSaturation();
     }
     pass BrightnessContrast < string Script= "Draw=Buffer;"; > {
         AlphaBlendEnable = FALSE;
