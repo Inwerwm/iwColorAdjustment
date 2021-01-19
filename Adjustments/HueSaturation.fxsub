@@ -1,0 +1,22 @@
+#ifndef EFFECT_MAIN
+    #include "ColorConverter.fxsub"
+#endif
+
+float MapHue(float hue, float offset){
+    hue = hue < 0 ? 1 + hue : hue;
+    return (hue + offset) % 1;
+}
+
+float MapSaturation(float saturation, float scale){
+    return clamp(saturation * scale, 0, 1);
+}
+
+float4 AdjustHueSaturation(float4 color, float hueOffset, float satScale){
+    float4 hsv = HSVFrom(color);
+    return RGBFrom(float4(
+        MapHue(hsv.x, hueOffset),
+        MapSaturation(hsv.y, (1.0 + satScale)),
+        hsv.z,
+        hsv.a
+    ));
+}

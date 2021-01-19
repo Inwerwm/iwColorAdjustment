@@ -1,5 +1,7 @@
+#define EFFECT_MAIN
+
 #include "Adjustments\ColorConverter.fxsub"
-#include "Adjustments\hsv.fxsub"
+#include "Adjustments\HueSaturation.fxsub"
 #include "Adjustments\BrightnessContrast.fxsub"
 
 // ÉRÉìÉgÉçÅ[Éâ
@@ -81,9 +83,7 @@ float4 PS_HSVScaling(float2 Tex: TEXCOORD0) : COLOR
 {   
     float4 Color = tex2D( ScnSamp, Tex );
     
-    Color = HSVFrom(Color);
-    Color = hsvAdjustment(Color, mHuePlus - mHueMinus, 1.0 + (mSatPlus * 2 - mSatMinus), 1.0);
-    Color = RGBFrom(Color);
+    Color = AdjustHueSaturation(Color, mHuePlus - mHueMinus,mSatPlus - mSatMinus);
 
     return Color;
 }
