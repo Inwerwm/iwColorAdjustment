@@ -30,22 +30,21 @@ float2 ViewportSize : VIEWPORTPIXELSIZE;
 static float2 ViewportOffset = (float2(0.5,0.5)/ViewportSize);
 
 // 背景のクリア値
-float4 ClearColor = {1,1,1,0};
+float4 ClearColor = float4(0, 0, 0, 0);
 float ClearDepth  = 1.0;
 
 // オリジナルの描画結果を記録するためのレンダーターゲット
 texture2D ScnMap : RENDERCOLORTARGET <
-    float2 ViewPortRatio = {1.0,1.0};
-    int MipLevels = 1;
-    string Format = "A8R8G8B8" ;
+	float2 ViewPortRatio = {1.0,1.0};
+	int MipLevels = 1;
+	string Format = "D3DFMT_A16B16G16R16F" ;
 >;
 sampler2D ScnSamp = sampler_state {
-    texture = <ScnMap>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = NONE;
-    AddressU  = CLAMP;
-    AddressV = CLAMP;
+    MAGFILTER = LINEAR;
+    MINFILTER = LINEAR;
+    MIPFILTER = LINEAR;
+	texture = <ScnMap>;
+	AddressU  = CLAMP; AddressV = CLAMP;
 };
 
 texture2D ScnMap2 : RENDERCOLORTARGET <
@@ -123,11 +122,13 @@ technique PostEffect <
 > {
     pass HSVScaling < string Script= "Draw=Buffer;"; > {
         AlphaBlendEnable = FALSE;
+        AlphaTestEnable = FALSE;
         VertexShader = compile vs_2_0 VS();
         PixelShader  = compile ps_2_0 PS_HueSaturation();
     }
     pass BrightnessContrast < string Script= "Draw=Buffer;"; > {
         AlphaBlendEnable = FALSE;
+        AlphaTestEnable = FALSE;
         VertexShader = compile vs_2_0 VS();
         PixelShader  = compile ps_2_0 PS_BrightnessContrast();
     }
